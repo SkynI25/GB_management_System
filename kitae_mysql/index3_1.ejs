@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../../../../favicon.ico">
+
+  <title>Dashboard Template for Bootstrap</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+
+  <link rel="stylesheet" type="text/css" href="/public/chosen.min.css">
+  <script type="text/javascript" src="/public/chosen.jquery.min.js"></script>
+  <script type="text/javascript" src="/public/chosen.proto.min.js"></script>
+
+  <script type="text/javascript">
+    $(function() {
+      var box = $("#box1");
+      <%
+  for (var i = 0; i < devices.length; i++) {
+  %>
+      box.append($('<option value="<%=devices[i].garbageid%>"></option>').text("<%=devices[i].garbageid%>"));
+      <%
+    }
+  %>
+
+      $(".my_select_box").chosen({
+        disable_search_threshold: 10,
+        no_results_text: "Oops, nothing found!",
+        width: "95%"
+      });
+      $(".my_select_box").on('chosen:ready', function(evt, params) {
+        console.log(evt);
+        console.log(params.selected);
+        console.log($(this).val());
+      });
+      $(".my_select_box").on('change', function(evt, params) {
+        //console.log(evt);
+        //console.log(params);
+        console.log($(this).val());
+      });
+
+
+    });
+  </script>
+
+
+  <!-- Bootstrap core CSS -->
+
+
+  <!-- Custom styles for this template -->
+  <link href="/public/dashboard.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/location">Kang lab</a>
+    <ul class="navbar-nav px-3">
+      <li class="nav-item text-nowrap">
+        <div class="nav-link"></div>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="/location">
+                  <span data-feather="home"></span>
+                  Location <span class="sr-only"></span>
+                </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/data/statistics">
+                  <span data-feather="file"></span>
+                  Garbage cans information
+                </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/data/statistics_calendar">
+                <span data-feather="file">(current)</span>
+                Daily statistics
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+          <h1 class="h2">Daily statistics</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+              </div>
+              <form action="/data/statistics_calendar" method="post">
+                <div class="btn-group mr-2" style="width: 120px;">
+                    <select class="my_select_box" data-placeholder="Select Your Options" id="box1" name="selectbox">
+                    </select>
+                </div>
+              <input type="submit" class="btn btn-sm btn-outline-secondary" value="Search">
+            </form>
+          </div>
+        </div>
+        <div id='calendar'>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <script>
+    window.jQuery || document.write('<script src="../public/jquery-slim.min.js"><\/script>')
+  </script>
+
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    feather.replace()
+  </script>
+
+  <!-- Graphs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+</body>
+
+</html>
