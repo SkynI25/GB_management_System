@@ -59,7 +59,7 @@ http://www.chartjs.org/docs/latest
 
 ## Database
 
-MariaDB 10.2 오픈 소스의 관계형 데이터베이스 관리 시스템(RDBMS)
+MariaDB 10.2 :<br>
 https://downloads.mariadb.org/mariadb/repositories/
 
 
