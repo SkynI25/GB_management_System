@@ -1,7 +1,7 @@
 # Garbage management System using IoT
-> 라즈베리파이와 Node.js, Javascript 를 이용한 쓰레기 관리 시스템입니다<br>
+> 라즈베리파이와 Node.js, Javascript 를 이용한 쓰레기 관리 시스템<br>
 
-교내 쓰레기통의 적재량을 체크하고 이를 관리하는 시스템입니다
+교내 WIFI를 이용해 쓰레기통의 적재량을 체크하고 이를 웹 브라우저를 통해 관리할 수 있는 기능을 제공합니다
 
 ## Installing / Getting started
 
