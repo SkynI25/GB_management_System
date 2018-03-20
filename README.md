@@ -22,12 +22,12 @@ npm install ejs --save
 ## Developing
 
 ### Built With
-> Node.js 8.9.4 (x64)
-> ejs template
-> bootstrap
-> FullCalendar
-> Chart.js
-> Date Range Picker
+> Node.js 8.9.4 (x64)<br>
+> ejs template<br>
+> bootstrap<br>
+> FullCalendar<br>
+> Chart.js<br>
+> Date Range Picker<br>
 
 ### Prerequisites
 
