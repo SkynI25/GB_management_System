@@ -39,34 +39,6 @@ node.js에서 소스코드가 변경되었을 때 에플리케이션을 자동�
 npm install supervisor -g
 ```
 
-
-### Setting up Dev
-
-Here's a brief intro about what a developer must do in order to start developing
-the project further:
-
-```shell
-git clone https://github.com/your/your-project.git
-cd your-project/
-packagemanager install
-```
-
-And state what happens step-by-step. If there is any virtual environment, local server or database feeder needed, explain here.
-
-### Building
-
-If your project needs some additional steps for the developer to build the
-project after some code changes, state them here. for example:
-
-```shell
-./configure
-make
-make install
-```
-
-Here again you should state what actually happens when the code above gets
-executed.
-
 ## Api Reference
 
 지도는 daum api를 사용하였습니다. app key 를 발급받아 html 부분에 사용해야 하는데 kakao 계정이 필요합니다<br>
