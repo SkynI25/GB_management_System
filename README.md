@@ -4,7 +4,7 @@
 교내 WIFI를 이용해 쓰레기통의 적재량을 체크하고 이를 웹 브라우저를 통해 관리할 수 있는 기능을 제공합니다
 
 ## System configuration
-[<img src="GB_management_System/image/systemconfig.JPG" width="640" height="480">]
+<img src="https://github.com/SkynI25/GB_management_System/blob/master/image/systemconfig.JPG" width="800" height="480">
 
 ## Installing / Getting started
 
