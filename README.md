@@ -3,6 +3,9 @@
 
 교내 WIFI를 이용해 쓰레기통의 적재량을 체크하고 이를 웹 브라우저를 통해 관리할 수 있는 기능을 제공합니다
 
+## System configuration
+[<img src="GB_management_System/image/systemconfig.JPG" width="640" height="480">]
+
 ## Installing / Getting started
 
 node.js 에서 설치해줘야 할 npm 모듈들
