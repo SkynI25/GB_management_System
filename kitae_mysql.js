@@ -1,5 +1,18 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var multer = require('multer')
+var _storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function(req, file, cb) {
+    cb(null, file.originalname);
+  }
+})
+var upload = multer({
+  storage: _storage
+})
+var fs = require('fs');
 var mysql = require('mysql');
 var conn = mysql.createConnection({
   host: 'localhost',
@@ -16,6 +29,9 @@ app.locals.pretty = true;
 app.use(express.static('./'));
 app.set('views', './kitae_mysql');
 app.set('view engine', 'ejs');
+app.get('/upload', function(req, res) {
+  res.render('upload');
+});
 
 app.get('/location', function(req, res) {
   var sql = `
@@ -162,10 +178,9 @@ app.post(['/data/statistics/device'], function(req, res) {
   });
 });
 app.post('/data/statistics', function(req, res) {
-  var deviceId = req.body.selectbox;
   var time = req.body.time;
   var dates = time.match(new RegExp("\\d*-\\d*-\\d*", "g"));
-  var sql = "select height, date_format(time, '%Y-%m-%d %HH') as t from sensordata where garbageid='"+deviceId+"' and time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY)";
+  var sql = 'select height, date_format(time, "%Y-%m-%d %HH") as t from sensordata where time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY)';
   conn.query(sql, dates, function(err, datas, fields) {
     if (err) {
       console.log(err);
@@ -239,19 +254,17 @@ app.post('/data/statistics_calendar', function(req, res) {
   });
 });
 app.post('/data/daychart', function(req, res) {
-  var deviceId = req.body.device;
-  console.log(deviceId);
-  var date1 = req.body.date;
-  var dates = date1.match(new RegExp("\\d*-\\d*-\\d*", "g"));
-  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %HH:%mm:%ss') as t from sensordata where garbageid='"+deviceId+"' and time >= ? and time < DATE_ADD(?, INTERVAL 1 DAY)";
-  conn.query(sql, [dates,dates], function(err, datas, fields) {
+  var date = req.body.date;
+  console.log(date);
+  var sql = 'select garbageid, height, date_format(time, "%Y-%m-%d %HH") as time from sensordata where time >= ? and time < DATE_ADD(?, INTERVAL 1 DAY)';
+  conn.query(sql, [date, date], function(err, datas, fields) {
     if (err) {
       console.log(err);
       res.status(500).send('Internal Server Error');
     } else {
-       if (datas == '') {
-         datas = [0, -1];
-       }
+      if (datas == '') {
+        datas = [0, -1];
+      }
       console.log(datas);
       res.render('daychart', {
         date: datas
@@ -259,10 +272,29 @@ app.post('/data/daychart', function(req, res) {
     }
   });
 });
-app.get('/rasp', function(req, res) {
-  console.log(req.query.name);
-});
 
+app.get('/rasp', function(req, res) {
+  var results = req.query.data;
+  console.log(results);
+  var datas = {};
+  for(i in results) {
+    datas = results[i];
+  }
+  heights = [];
+  for(i in results) {
+   heights.push(results[i]);
+   console.log(heights);
+   }
+   var sql = "INSERT INTO sensordata (garbageid, height, time) VALUES(?, ?, ?)";
+   conn.query(sql, [heights[0], heights[1], heights[2]], function(err, datas, fields) {
+     if (err) {
+       console.log(err);
+       res.status(500).send('Internal Server Error');
+     } else {
+       res.send('ok');
+     }
+   });
+});
 app.listen(64000, function() {
   console.log('Connected 64000 port!');
 });
