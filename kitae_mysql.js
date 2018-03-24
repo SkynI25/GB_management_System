@@ -1,48 +1,20 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var multer = require('multer')
-var _storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function(req, file, cb) {
-    cb(null, file.originalname);
-  }
-})
-var upload = multer({
-  storage: _storage
-})
-var fs = require('fs');
 var mysql = require('mysql');
-var conn = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '111111',
-  database: 'kitae'
-});
-conn.connect();
-var app = express();
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
-app.locals.pretty = true;
-app.use(express.static('./'));
-app.set('views', './kitae_mysql');
-app.set('view engine', 'ejs');
-
-var connection;
 function handleDisconnect() {
-  connection = mysql.createConnection(conn); // Recreate the connection, since
-                                                  // the old one cannot be reused.
-
-  connection.connect(function(err) {              // The server is either down
+  var conn = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '111111',
+    database: 'kitae'
+  });
+  conn.connect(function(err) {
     if(err) {                                     // or restarting (takes a while sometimes).
       console.log('error when connecting to db:', err);
       setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
-    }                                     // to avoid a hot loop, and to allow our node script to
-  });                                     // process asynchronous requests in the meantime.
-                                          // If you're also serving http, display a 503 error.
-  connection.on('error', function(err) {
+    }
+  });
+  conn.on('error', function(err) {
     console.log('db error', err);
     if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
       handleDisconnect();                         // lost due to either server restart, or a
@@ -52,7 +24,14 @@ function handleDisconnect() {
   });
 }
 
-handleDisconnect();
+var app = express();
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+app.locals.pretty = true;
+app.use(express.static('./'));
+app.set('views', './kitae_mysql');
+app.set('view engine', 'ejs');
 
 app.get('/location', function(req, res) {
   var sql = `
@@ -75,25 +54,39 @@ app.get('/location', function(req, res) {
 
       var result = [
         {
-          latestHeightPercent: 70,
-          latestTime: "2018-03-09 14:19:08",
+          latestHeightPercent: datas[0].height,
+          latestTime: datas[0].time,
           title: '공학1관 쓰레기통',
           lat: 36.765797,
           lng: 127.281271
         },
         {
-          latestHeightPercent: 70,
-          latestTime: "2018-03-09 14:19:08",
+          latestHeightPercent: 50,
+          latestTime: '2018-03-09 14:19:08',
           title: '인문경영관 쓰레기통',
           lat: 36.765220,
           lng: 127.281771
         },
         {
           latestHeightPercent: 50,
-          latestTime: "2018-03-09 14:19:08",
-          title: '담헌 쓰레기통',
-          lat: 36.765937,
-          lng: 127.282200
+          latestTime: '2018-03-09 14:19:08',
+          title: '대강당 쓰레기통',
+          lat: 36.764403,
+          lng: 127.280594
+        },
+        {
+          latestHeightPercent: 50,
+          latestTime: '2018-03-09 14:19:08',
+          title: '본관 교차로 쓰레기통',
+          lat: 36.764360,
+          lng: 127.281963
+        },
+        {
+          latestHeightPercent: 50,
+          latestTime: '2018-03-09 14:19:08',
+          title: 'GEC 인경관 사이 쓰레기통',
+          lat: 36.764614,
+          lng: 127.281222
         }
       ];
 
