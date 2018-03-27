@@ -1,6 +1,12 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var conn = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '111111',
+  database: 'kitae'
+});
 function handleDisconnect() {
   var conn = mysql.createConnection({
     host: 'localhost',
