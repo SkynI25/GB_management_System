@@ -36,6 +36,8 @@
 
 
 
+![20180518_120748](https://user-images.githubusercontent.com/20556561/40214303-e7fa1b2e-5a94-11e8-97d9-4afe16bce85a.jpg)
+
 ## 쓰레기통과 높이 계산 수식
 --------------
 <img src="https://github.com/SkynI25/GB_management_System/blob/master/image/20180518_115234.jpg" width="90%"/>
