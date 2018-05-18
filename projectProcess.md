@@ -34,6 +34,7 @@
 ## 단계별로 표시
 --------------
 
+2180518_115234](https://user-images.githubusercontent.com/20556561/40214167-38627760-5a94-11e8-8eca-76b5895d7aa9.jpg)
 ## 쓰레기통과 높이 계산 수식
 --------------
 <img src="https://github.com/SkynI25/GB_management_System/blob/master/image/20180518_115234.jpg" width="90%"/>
