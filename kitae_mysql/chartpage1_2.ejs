@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>CBD project</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <!-- Calendar -->
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script type="text/javascript" src="http://cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+  <script type="text/javascript" src="http://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script type="text/javascript" src="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/public/chosen.min.css">
+  <script type="text/javascript" src="/public/chosen.jquery.min.js"></script>
+  <script type="text/javascript" src="/public/chosen.proto.min.js"></script>
+
+  <script type="text/javascript">
+
+  function validateForm()
+  {
+    if(document.getElementById("daterange1").value == null || document.getElementById("daterange1").value=="")
+    {
+      alert("Please select date first");
+      return false;
+    }
+  }
+
+  $(function() {
+    $("#daterange1").daterangepicker({
+        autoUpdateInput: false,
+        locale: {
+          format: 'YYYY-MM-DD'
+        }
+      },
+      function(start, end, label) {
+        console.log("New date range selected: " +
+          start.format('YYYY-MM-DD') + " to " +
+          end.format('YYYY-MM-DD') + " (predefined range: " +
+          label + ")");
+        //window.location="/newuploadlist?start="+startdate+"&end="+enddate;
+      });
+    $("#daterange1").on('apply.daterangepicker',
+      function(ev, picker) {
+        $(this).val(
+          picker.startDate.format('YYYY-MM-DD') + ' - ' +
+          picker.endDate.format('YYYY-MM-DD'));
+
+      });
+
+    var str = "<%=dates[0]%> ~ <%=dates[1]%>";
+    str = str.length < 10 ? '' : str;
+    $("#period").text(str);
+
+    var box = $("#box1");
+    box.append($('<option value="*"></option>').text("*"));
+    <%
+    for (var i = 0; i < devices.length; i++) {
+    %>
+    box.append($('<option value="<%=devices[i].garbageid%>"></option>').text("<%=deviceName[i]%>"));
+    <%
+    }
+    %>
+
+    $(".my_select_box").chosen({
+      disable_search_threshold: 10,
+      no_results_text: "Oops, nothing found!",
+      width: "95%"
+    });
+    $(".my_select_box").on('chosen:ready', function(evt, params) {
+      console.log(evt);
+      console.log(params.selected);
+      console.log($(this).val());
+    });
+    $(".my_select_box").on('change', function(evt, params) {
+      //console.log(evt);
+      //console.log(params);
+      console.log($(this).val());
+    });
+
+
+  });
+  </script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+  <!-- Custom styles for this template -->
+  <link href="/public/dashboard.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/location">GBM_System with IoT</a>
+    <ul class="navbar-nav px-3">
+      <li class="nav-item text-nowrap">
+        <div class="nav-link" ></div>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <p></p>
+            <p></p>
+            <p></p>
+            <li class="nav-item">
+              <a class="nav-link" href="/location">
+                  <span data-feather="map"></span>
+                  Location <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/chart">
+                  <span data-feather="trending-up"></span>
+                  Garbage cans information
+                </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/calendar">
+                  <span data-feather="calendar"></span>
+                  Daily statistics
+                </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/report">
+                  <span data-feather="clipboard"></span>
+                  Weekly report
+                </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+          <h1 class="h2">100% 적재 비율(Choosing ID : 모든 쓰레기통)</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <form action="/chart" name="Form" method="post">
+              <div class="btn-group mr-2">
+                Date : <input type='text' name="time" id="daterange1" style="width: 300px;">
+              </div>
+              <div class="btn-group mr-2" style="width: 200px;">
+                  <select class="my_select_box" data-placeholder="Select Your Options" id="box1" name="selectbox">
+                  </select>
+              </div>
+              <div class="btn-group mr-2">
+              </div>
+              <input type="submit" class="btn btn-sm btn-outline-secondary" value="Search" onclick="return validateForm();">
+            </form>
+          </div>
+        </div>
+        <div>
+        </div>
+        <canvas class="my-4 chartjs-render-monitor" id="myChart" width="900" height="380" style="display: block; width: 900px; height: 380px;"></canvas>
+      </main>
+    </div>
+  </div>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <script>
+    window.jQuery || document.write('<script src="../public/jquery-slim.min.js"><\/script>')
+  </script>
+
+
+
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    feather.replace()
+  </script>
+
+  <!-- Graphs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script>
+    function pad(n, width, z) {
+      z = z || '0';
+      n = n + '';
+      return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
+    var ctx = document.getElementById("myChart");
+    var results1 = {};
+    var results1_1 = {};
+    var results2 = {};
+    var results2_1 = {};
+    var results3 = {};
+    var results3_1 = {};
+    var results4 = {};
+    var results4_1 = {};
+    var results5 = {};
+    var results5_1 = {};
+    var dates = ["<%=dates[0]%>", "<%=dates[1]%>"];
+
+    var start = new Date(0);
+    start.setFullYear(dates[0].split("-")[0], dates[0].split("-")[1] - 1, dates[0].split("-")[2]);
+    var end = new Date(0);
+    end.setFullYear(dates[1].split("-")[0], dates[1].split("-")[1] - 1, dates[1].split("-")[2]);
+
+    while (start <= end) {
+      var str = (start.getYear() + 1900) + "-" + pad((start.getMonth() + 1), 2) + "-" + pad(start.getDate(), 2);
+      results1[str] = 0;
+      results1_1[str] = 0;
+      results2[str] = 0;
+      results2_1[str] = 0;
+      results3[str] = 0;
+      results3_1[str] = 0;
+      results4[str] = 0;
+      results4_1[str] = 0;
+      results5[str] = 0;
+      results5_1[str] = 0;
+      start = new Date(start.getTime() + 86400000);
+    }
+    <%
+     for(var i = 0; i < datas.length; ++i) {
+    %>
+      if(("<%=datas[i].garbageid%>") == 'a') {
+        var times1 = "<%=datas[i].t%>".split(" ")
+        results1_1[times1[0]] += 1;
+        if((parseInt("<%=datas[i].height%>") >= 100)) {
+          var times1_1 = "<%=datas[i].t%>".split(" ");
+          results1[times1_1[0]] += 1;
+        }
+      }
+
+      if(("<%=datas[i].garbageid%>") == 'b') {
+        var times2 = "<%=datas[i].t%>".split(" ")
+        results2_1[times2[0]] += 1;
+        if((parseInt("<%=datas[i].height%>") >= 100)) {
+          var times2_1 = "<%=datas[i].t%>".split(" ");
+          results2[times2_1[0]] += 1;
+        }
+      }
+
+      if(("<%=datas[i].garbageid%>") == 'c') {
+        var times3 = "<%=datas[i].t%>".split(" ")
+        results3_1[times3[0]] += 1;
+        if((parseInt("<%=datas[i].height%>") >= 100)) {
+          var times3_1 = "<%=datas[i].t%>".split(" ");
+          results3[times3_1[0]] += 1;
+        }
+      }
+
+      if(("<%=datas[i].garbageid%>") == 'd') {
+        var times4 = "<%=datas[i].t%>".split(" ")
+        results4_1[times4[0]] += 1;
+        if((parseInt("<%=datas[i].height%>") >= 100)) {
+          var times4_1 = "<%=datas[i].t%>".split(" ");
+          results4[times4_1[0]] += 1;
+        }
+      }
+
+      if(("<%=datas[i].garbageid%>") == 'e') {
+        var times5 = "<%=datas[i].t%>".split(" ")
+        results5_1[times5[0]] += 1;
+        if((parseInt("<%=datas[i].height%>") >= 100)) {
+          var times5_1 = "<%=datas[i].t%>".split(" ");
+          results5[times5_1[0]] += 1;
+        }
+      }
+    <%
+    }
+    %>
+    var limits=[];
+    var heights1 = [];
+    for (var key in results1) {
+      heights1.push(results1[key]);
+    }
+    var heights1_1 = [];
+    for (var key in results1_1) {
+      heights1_1.push(results1_1[key]);
+    }
+    var heights1_2 = [];
+    for(i=0; i<heights1_1.length; i++) {
+      heights1_2.push(Math.round((heights1[i]/heights1_1[i])*100));
+    }
+
+    var heights2 = [];
+    for (var key in results2) {
+      heights2.push(results2[key]);
+    }
+    var heights2_1 = [];
+    for (var key in results2_1) {
+      heights2_1.push(results2_1[key]);
+    }
+    var heights2_2 = [];
+    for(i=0; i<heights2_1.length; i++) {
+      heights2_2.push(Math.round((heights2[i]/heights2_1[i])*100));
+    }
+
+    var heights3 = [];
+    for (var key in results3) {
+      heights3.push(results3[key]);
+    }
+    var heights3_1 = [];
+    for (var key in results3_1) {
+      heights3_1.push(results3_1[key]);
+    }
+    var heights3_2 = [];
+    for(i=0; i<heights3_1.length; i++) {
+      heights3_2.push(Math.round((heights3[i]/heights3_1[i])*100));
+    }
+
+    var heights4 = [];
+    for (var key in results4) {
+      heights4.push(results4[key]);
+    }
+    var heights4_1 = [];
+    for (var key in results4_1) {
+      heights4_1.push(results4_1[key]);
+    }
+    var heights4_2 = [];
+    for(i=0; i<heights4_1.length; i++) {
+      heights4_2.push(Math.round((heights4[i]/heights4_1[i])*100));
+    }
+
+    var heights5 = [];
+    for (var key in results5) {
+      heights5.push(results5[key]);
+    }
+    var heights5_1 = [];
+    for (var key in results5_1) {
+      heights5_1.push(results5_1[key]);
+    }
+    var heights5_2 = [];
+    for(i=0; i<heights5_1.length; i++) {
+      heights5_2.push(Math.round((heights5[i]/heights5_1[i])*100));
+    }
+
+    var mixedChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: '공학 1관 쓰레기통',
+          data: heights1_2,
+          lineTension: 0,
+          fill : false,
+          borderColor: '#67e010',
+          borderWidth: 4
+        },
+        {
+          label: '인문경영관 매점 쓰레기통',
+          data: heights2_2,
+          lineTension: 0,
+          fill : false,
+          borderColor: '#4441ea',
+          borderWidth: 4
+        },
+        {
+          label: '대강당 쓰레기통',
+          data: heights3_2,
+          lineTension: 0,
+          fill : false,
+          borderColor: '#eac541',
+          borderWidth: 4
+        },
+        {
+          label: '본관 교차로 쓰레기통',
+          data: heights4_2,
+          lineTension: 0,
+          fill : false,
+          borderColor: '#ff6347',
+          borderWidth: 4
+        },
+        {
+          label: 'GEC 인경관 사이 쓰레기통',
+          data: heights5_2,
+          lineTension: 0,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 0.2)',
+          borderWidth: 4,
+          pointBackgroundColor: 'rgba(54, 162, 235, 0.2)',
+        }],
+        labels: Object.keys(results1)
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        },
+        legend: {
+          display: true
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
