@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" href="../../../../favicon.ico">
+
+  <title>Dashboard Template for Bootstrap</title>
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+  <!-- Custom styles for this template -->
+  <link href="../public/dashboard.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+  <canvas id="myChart"></canvas>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <script>
+    window.jQuery || document.write('<script src="../public/jquery-slim.min.js"><\/script>')
+  </script>
+
+
+
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+  <script>
+    feather.replace()
+  </script>
+
+  <!-- Graphs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script>
+    function pad(n, width, z) {
+      z = z || '0';
+      n = n + '';
+      return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
+    var ctx = document.getElementById("myChart");
+    var results = {};
+    var limits = [];
+    <%
+     for(var i = 0; i < date.length; ++i) {
+    %>
+        var garbageid = "<%=date[i].garbageid%>";
+        var time = "<%=date[i].time%>";
+        var height = parseInt("<%=date[i].height%>");
+        if(!(garbageid in results)) results[garbageid] = {}
+        results[garbageid][time] = height;
+        limits.push(100);
+    <%
+     }
+    %>
+    console.log(results);
+
+    var heights = [];
+    for (var key in results[garbageid]) {
+      heights.push(results[garbageid][key]);
+    }
+
+    var mixedChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          // OK
+          label: '최대치',
+          data: limits,
+          lineTension: 0,
+          fill : false,
+          borderColor: '#ff6347',
+          borderWidth: 4
+        },
+        {
+          label: '적재율',
+          data: heights,
+          lineTension: 0,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 0.2)',
+          borderWidth: 4,
+          pointBackgroundColor: 'rgba(54, 162, 235, 0.2)',
+        }],
+        labels: Object.keys(results[garbageid])
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        },
+        legend: {
+          display: true
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
