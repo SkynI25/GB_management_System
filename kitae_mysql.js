@@ -27,7 +27,7 @@ app.get('/location', function(req, res) {
   		ON y.garbageid = x.garbageid
   	GROUP BY x.garbageid
   ) t, sensordata
-  WHERE t.id = sensordata.id
+  WHERE t.id = sensordata.id order by garbageid ASC
   `;
   mysqlPool.getConnection(function(err, conn) {
     if(err) throw err;
@@ -37,40 +37,38 @@ app.get('/location', function(req, res) {
         console.log(err);
         return;
       } else {
-        console.log(datas)
-
         var result = [
           {
             latestHeightPercent: datas[0].height,
             latestTime: datas[0].time,
             title: '공학1관 쓰레기통',
-            lat: 36.765797,
-            lng: 127.281271
+            lat: 36.765565,
+            lng: 127.281254
           },
           {
-            latestHeightPercent: 50,
-            latestTime: '2018-03-09 14:19:08',
-            title: '인문경영관 쓰레기통',
+            latestHeightPercent: datas[1].height,
+            latestTime: datas[1].time,
+            title: '인문경영관 매점 쓰레기통',
             lat: 36.765220,
             lng: 127.281771
           },
           {
-            latestHeightPercent: 50,
-            latestTime: '2018-03-09 14:19:08',
+            latestHeightPercent: datas[2].height,
+            latestTime: datas[2].time,
             title: '대강당 쓰레기통',
             lat: 36.764403,
             lng: 127.280594
           },
           {
-            latestHeightPercent: 50,
-            latestTime: '2018-03-09 14:19:08',
+            latestHeightPercent: datas[3].height,
+            latestTime: datas[3].time,
             title: '본관 교차로 쓰레기통',
             lat: 36.764360,
             lng: 127.281963
           },
           {
-            latestHeightPercent: 50,
-            latestTime: '2018-03-09 14:19:08',
+            latestHeightPercent: datas[4].height,
+            latestTime: datas[4].time,
             title: 'GEC 인경관 사이 쓰레기통',
             lat: 36.764614,
             lng: 127.281222
@@ -78,8 +76,7 @@ app.get('/location', function(req, res) {
         ];
 
         res.render('map', {
-          // datas: datas,
-          // devices: device,
+          datas: datas,
           dates: ['', ''],
           result: result
         });
@@ -89,90 +86,11 @@ app.get('/location', function(req, res) {
   });
 });
 
-app.post('/data/search', function(req, res) {
-  var time = req.body.time;
-  var dates = time.match(new RegExp("\\d*-\\d*-\\d*", "g"));
-  var device = req.body.selectbox;
-  var sql = "SELECT * from sensordata where";
-  if (time != '') {
-    sql += " (time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY)) and";
-  }
-  if (device != "*") {
-    sql += " garbageid='" + device + "' and";
-  }
-  if (sql.endsWith('where') || sql.endsWith('and')) {
-    sql += " true";
-  }
-  mysqlPool.getConnection(function(err, conn) {
-    if(err) throw err;
-    conn.query(sql, dates, function(err, datas, fields) {
-      if (err) {
-        conn.release();
-        console.log(err);
-        return;
-      } else {
-        sql = "SELECT DISTINCT garbageid from sensordata";
-        conn.query(sql, function(err, devices) {
-          if (err) {
-            conn.release();
-            console.log(err);
-            return;
-          } else {
-            dates = (!dates || dates.length < 2) ? ['', ''] : dates;
-            res.render('map', {
-              datas: datas,
-              devices: devices,
-              dates: dates
-            });
-            conn.release();
-          }
-        });
-      }
-    });
-  });
-});
-
-app.get(['/data/statistics'], function(req, res) {
-  var sql = 'select garbageid, height, date_format(time, "%Y-%m-%d %HH") from sensordata;';
-  mysqlPool.getConnection(function(err, conn) {
-    if(err) throw err;
-    conn.query(sql, function(err, datas, fields) {
-      if (err) {
-        conn.release();
-        console.log(err);
-        return;
-      } else {
-        sql = 'SELECT DISTINCT garbageid FROM sensordata';
-        conn.query(sql, function(err, device) {
-          if (err) {
-            conn.release();
-            console.log(err);
-            return;
-          } else {
-            res.render('index2', {
-              datas: [],
-              devices: device,
-              dates: [0, -1]
-            });
-            conn.release();
-          }
-        });
-      }
-    });
-  });
-});
-
-app.post(['/data/statistics/device'], function(req, res) {
-  var deviceId = req.body.name;
-  var d = new Date();
-  function pad(n, width, z) {
-    z = z || '0';
-    n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-  }
-  var today = d.getFullYear() + '-' + pad((d.getMonth() + 1), 2) + '-' + pad((d.getDate()), 2);
-  var today2 = d.getFullYear() + '-' + pad((d.getMonth() + 2), 2) + '-' + pad((d.getDate()), 2);
-  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %HH') as t from sensordata where garbageid = '" + deviceId + "' and time >= ? and time <= ?;";
+app.get(['/chart'], function(req, res) {
+  var today = "2018-04-28";
+  var today2 = "2018-05-05";
+  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %Hh:%im:') as t from sensordata where time >= ? and time <= ?;";
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
   mysqlPool.getConnection(function(err, conn) {
     if(err) throw err;
     conn.query(sql, [today, today2], function(err, datas, fields) {
@@ -181,17 +99,18 @@ app.post(['/data/statistics/device'], function(req, res) {
         console.log(err);
         return;
       } else {
-        sql = 'SELECT DISTINCT garbageid FROM sensordata';
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
         conn.query(sql, function(err, device) {
           if (err) {
             conn.release();
             console.log(err);
             return;
           } else {
-            res.render('index2', {
+            res.render('chartpage1_2', {
               datas: datas,
+              dates: [today, today2],
               devices: device,
-              dates: [today, today2]
+              deviceName : deviceName
             });
             conn.release();
           }
@@ -201,10 +120,58 @@ app.post(['/data/statistics/device'], function(req, res) {
   });
 });
 
-app.post('/data/statistics', function(req, res) {
+app.post(['/chart/device'], function(req, res) {
+  var deviceId = req.body.name;
+  var d = new Date();
+  function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+  }
+  var today = "2018-04-28";
+  var today2 = "2018-05-05";
+  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %Hh:%im') as t from sensordata where garbageid = '" + deviceId + "' and time >= ? and time <= ?;";
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
+  mysqlPool.getConnection(function(err, conn) {
+    if(err) throw err;
+    conn.query(sql, [today, today2], function(err, datas, fields) {
+      if (err) {
+        conn.release();
+        console.log(err);
+        return;
+      } else {
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
+        conn.query(sql, function(err, device) {
+          if (err) {
+            conn.release();
+            console.log(err);
+            return;
+          } else {
+            res.render('chartpage1_1', {
+              datas: datas,
+              devices: device,
+              dates: [today, today2],
+              deviceName : deviceName
+            });
+            conn.release();
+          }
+        });
+      }
+    });
+  });
+});
+
+app.post('/chart', function(req, res) {
   var time = req.body.time;
+  var deviceId = req.body.selectbox;
   var dates = time.match(new RegExp("\\d*-\\d*-\\d*", "g"));
-  var sql = 'select height, date_format(time, "%Y-%m-%d %HH") as t from sensordata where time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY)';
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
+  if(deviceId != "*") {
+    var sql = "select garbageid, height, date_format(time, '%Y-%m-%d') as t from sensordata where time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY) and garbageid='"+deviceId+"';";
+  }
+  else {
+    var sql = "select garbageid, height, date_format(time, '%Y-%m-%d') as t from sensordata where time >= ? and time <= DATE_ADD(?, INTERVAL 1 DAY)";
+  }
   mysqlPool.getConnection(function(err, conn) {
     if(err) throw err;
     conn.query(sql, dates, function(err, datas, fields) {
@@ -213,46 +180,60 @@ app.post('/data/statistics', function(req, res) {
         console.log(err);
         return;
       } else {
-        sql = "SELECT DISTINCT garbageid from sensordata";
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
         conn.query(sql, function(err, devices, fields) {
           if (err) {
             conn.release();
             console.log(err);
             return;
           } else {
-            res.render('index2', {
+            if(deviceId != "*") {
+            res.render('chartpage1_1', {
               datas: datas,
               dates: dates,
-              devices: devices
+              devices: devices,
+              choosingID : deviceId,
+              deviceName : deviceName
+            });
+            conn.release();
+          } else {
+            res.render('chartpage1_2', {
+              datas: datas,
+              dates: dates,
+              devices: devices,
+              choosingID : deviceId,
+              deviceName : deviceName
             });
             conn.release();
           }
+        }
         });
       }
     });
   });
 });
 
-app.get('/data/statistics_calendar', function(req, res) {
+app.get('/calendar', function(req, res) {
   var sql = 'select garbageid, height, date_format(time, "%Y-%m-%d") as time from sensordata';
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
   mysqlPool.getConnection(function(err, conn) {
     conn.query(sql, function(err, datas, fields) {
-      console.log(datas);
       if (err) {
         conn.release();
         console.log(err);
         return;
       } else {
-        sql = "SELECT DISTINCT garbageid from sensordata";
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
         conn.query(sql, function(err, devices) {
           if (err) {
             conn.release();
             console.log(err);
             return;
           } else {
-            res.render('index3_1', {
+            res.render('calendar1', {
               datas: datas,
-              devices: devices
+              devices: devices,
+              deviceName : deviceName
             });
             conn.release();
           }
@@ -262,15 +243,10 @@ app.get('/data/statistics_calendar', function(req, res) {
   });
 });
 
-app.post('/data/statistics_calendar', function(req, res) {
-  var device = req.body.selectbox;
-  var sql = 'SELECT garbageid, height, date_format(time, "%Y-%m-%d") as time from sensordata where';
-  if (device != "*") {
-    sql += " garbageid='" + device + "' and";
-  }
-  if (sql.endsWith('where') || sql.endsWith('and')) {
-    sql += " true";
-  }
+app.post('/calendar', function(req, res) {
+  var deviceId = req.body.selectbox;
+  var sql = "SELECT garbageid, height, date_format(time, '%Y-%m-%d %Hh:%im') as time from sensordata where garbageid = '" + deviceId + "';"
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
   mysqlPool.getConnection(function(err, conn) {
     if(err) throw err;
     conn.query(sql, function(err, datas, fields) {
@@ -279,16 +255,17 @@ app.post('/data/statistics_calendar', function(req, res) {
         console.log(err);
         return;
       } else {
-        sql = "SELECT DISTINCT garbageid from sensordata";
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
         conn.query(sql, function(err, devices) {
           if (err) {
             conn.release();
             console.log(err);
             return;
           } else {
-            res.render('index3', {
+            res.render('calendar2', {
               datas: datas,
-              devices: devices
+              devices: devices,
+              deviceName : deviceName
             });
             conn.release();
           }
@@ -299,10 +276,10 @@ app.post('/data/statistics_calendar', function(req, res) {
 });
 
 
-app.post('/data/daychart', function(req, res) {
+app.post('/daychart', function(req, res) {
   var date = req.body.date;
-  console.log(date);
-  var sql = 'select garbageid, height, date_format(time, "%Y-%m-%d %HH") as time from sensordata where time >= ? and time < DATE_ADD(?, INTERVAL 1 DAY)';
+  var deviceId = req.body.deviceId;
+  var sql = "select garbageid, height, date_format(time, '%Hh:%im') as time from sensordata where time >= ? and time < DATE_ADD(?, INTERVAL 1 DAY) and garbageid='"+deviceId+"';";
   mysqlPool.getConnection(function(err, conn) {
     if(err) throw err;
     conn.query(sql, [date, date], function(err, datas, fields) {
@@ -314,11 +291,80 @@ app.post('/data/daychart', function(req, res) {
         if (datas == '') {
           datas = [0, -1];
         }
-        console.log(datas);
         res.render('daychart', {
           date: datas
         });
         conn.release();
+      }
+    });
+  });
+});
+
+app.get(['/report'], function(req, res) {
+  var today = "2018-04-28";
+  var today2 = "2018-05-04";
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
+  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %Hh:%im') as t from sensordata where time >= ? and time <= ?;";
+  mysqlPool.getConnection(function(err, conn) {
+    if(err) throw err;
+    conn.query(sql, [today, today2], function(err, datas, fields) {
+      if (err) {
+        conn.release();
+        console.log(err);
+        return;
+      } else {
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
+        conn.query(sql, function(err, device) {
+          if (err) {
+            conn.release();
+            console.log(err);
+            return;
+          } else {
+            res.render('report', {
+              datas: datas,
+              dates: [today, today2],
+              devices: device,
+              deviceName : deviceName
+            });
+            conn.release();
+          }
+        });
+      }
+    });
+  });
+});
+
+app.post(['/report'], function(req, res) {
+  var today = "2018-04-28";
+  var today2 = "2018-05-04";
+  var deviceId = req.body.selectbox;
+  var deviceName = ['공학 1관 쓰레기통','인문경영관 매점 쓰레기통','대강당 쓰레기통​','본관 교차로 쓰레기통','GEC 인경관 사이 쓰레기통'];
+  var sql = "select garbageid, height, date_format(time, '%Y-%m-%d %Hh:%im') as t from sensordata where time >= ? and time <= ?";
+  mysqlPool.getConnection(function(err, conn) {
+    if(err) throw err;
+    conn.query(sql, [today, today2], function(err, datas, fields) {
+      if (err) {
+        conn.release();
+        console.log(err);
+        return;
+      } else {
+        sql = "SELECT DISTINCT garbageid from sensordata order by garbageid ASC";
+        conn.query(sql, function(err, device) {
+          if (err) {
+            conn.release();
+            console.log(err);
+            return;
+          } else {
+            res.render('report2', {
+              datas: datas,
+              dates: [today, today2],
+              devices: device,
+              deviceId : deviceId,
+              deviceName : deviceName
+            });
+            conn.release();
+          }
+        });
       }
     });
   });
@@ -334,7 +380,6 @@ app.get('/rasp', function(req, res) {
   heights = [];
   for(i in results) {
    heights.push(results[i]);
-   console.log(heights);
    }
   var sql = "INSERT INTO sensordata (garbageid, height, time) VALUES(?, ?, ?)";
   mysqlPool.getConnection(function(err, conn) {
